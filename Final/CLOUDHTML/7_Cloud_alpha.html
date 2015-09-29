@@ -1,0 +1,181 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>creative One</title>
+      <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+      <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+      <script type="text/javascript" src="paper-full.js"></script>
+      <script>
+      // $(document).ready(function(){
+      //   var $form = $('form');
+      //   $form.submit(function(){
+      //     $.post($(this).attr('action'), $(this).serialize(), function(response){
+      //         // do something here on success
+      //       },'json');
+      //       return false;
+      //     });
+      //   });
+      function draw(){
+        var url = "https://api.particle.io/v1/devices/2f0038000547343339373536/led?access_token=ee9c688ffe1f9bc47dbb85ed10701010bb647eeb"
+        $.post(url, {"arg" : "on"})
+        console.log("really?");
+      }
+
+      function destory(){
+        var url = "https://api.particle.io/v1/devices/2f0038000547343339373536/led?access_token=ee9c688ffe1f9bc47dbb85ed10701010bb647eeb"
+        $.post(url, {"arg" : "off"})
+        console.log("seareally?");
+      }
+      </script>
+  </head>
+<body>
+    <canvas id="myCanvas" width="800" height="400" style="border:0px solid #000000;"></canvas>
+    <br>
+    <button onclick="start()" >Connect</button>
+    <button onclick="draw()">Bubble Maker</button>
+    <button onclick="destory()">Bubble Destroyer</button>
+
+    <script type="text/javascript">
+
+    paper.install(window);
+    var canvas = document.getElementById("myCanvas");
+    // // Create an empty project and a view for the canvas:
+    paper.setup(canvas);
+    var circleGroup = new paper.Group();
+    var path = new Path.Circle(new Point(200, 100), 50);
+    circleGroup.addChild(path);
+    //path.strokeColor = 'grey';
+    path.fillColor = 'rgb(0,255,255)';
+    var i = 1;
+
+
+    function start() {
+      var deviceID = "2f0038000547343339373536";
+      var accessToken = "ee9c688ffe1f9bc47dbb85ed10701010bb647eeb";
+      var eventSource = new EventSource("https://api.spark.io/v1/devices/" + deviceID + "/events/?access_token=" + accessToken);
+
+        eventSource.addEventListener('open', function(e) {
+            console.log("Opened!"); },false);
+
+        eventSource.addEventListener('error', function(e) {
+            console.log("Errored!"); },false);
+
+        eventSource.addEventListener('everything', function(e) {
+          var rawData = JSON.parse(e.data);
+          var parsedData = JSON.parse(rawData.data);
+          console.log(parsedData.x);
+          //when the accel being tapped, new ball generate
+          if(parsedData.tap){
+            // circleGroup.lastChild.position.x += 100;
+            // circleGroup.lastChild.position.y += 50;
+            if(circleGroup.lastChild){
+              moveCircle(circleGroup.lastChild);
+            }
+            var path = new Path.Circle(new Point(Math.random()*800, Math.random()*400), Math.random()*100);
+            //var path = new Path.Circle(new Point(Math.random()*400, Math.random()*200), Math.random()*100);
+            //path.strokeColor = 'grey';
+            circleGroup.addChild(path);
+            circleGroup.lastChild.fillColor = posToColor(parsedData);
+          }else{
+            //when the accel not being tapped
+            if(circleGroup.lastChild){
+              circleGroup.lastChild.fillColor = posToColor(parsedData);
+            }
+          }
+          paper.view.draw();
+        }, false);
+
+        eventSource.addEventListener("erase", function(e) {
+          console.log("still connecting but in erase mode");
+          var rawData = JSON.parse(e.data);
+          var parsedData = JSON.parse(rawData.data);
+          console.log(parsedData.sensor)
+          var color = circleGroup.lastChild.fillColor.alpha;
+          //version 1
+          // if (parsedData.sensor > 1000){
+          //   console.log("catch you!");
+          //   if(circleGroup.lastChild.fillColor.alpha >= .05){
+          //     circleGroup.lastChild.fillColor.alpha = parseFloat( circleGroup.lastChild.fillColor.alpha ) - .05;
+          //     console.log("here");
+          //   }else{
+          //     circleGroup.lastChild.remove();
+          //   }
+          //   console.log(circleGroup.lastChild.fillColor.alpha);
+
+          //version 2
+            console.log("catch you!");
+            if(color >= .05){
+              circleGroup.lastChild.fillColor.alpha = parseFloat( color ) - 0.00005 * parsedData.sensor
+              console.log("here");
+            }else{
+              circleGroup.lastChild.remove();
+            }
+            console.log(circleGroup.lastChild.fillColor.alpha);
+
+            paper.view.draw();
+        }, false);
+    }
+
+    function moveCircle(circle){
+      var destination = new Point(Math.random()*800, Math.random()*400);
+
+			var timer = setInterval(function(){
+        //var vector = new Point(destination.x - )
+        //console.log(destination.x);
+        //console.log(circle.position.x)
+        var vector = new Point((destination.x - circle.position.x), (destination.y - circle.position.y));
+        circle.position.x += ((vector.x) / 50);
+        circle.position.y += ((vector.y) / 50);
+        //console.log(circle.position.x);
+        //console.log(vector.length);
+        paper.view.draw();
+        if (vector.length < 10) {
+		        clearInterval(timer);
+          }
+			}, 100);
+		}
+
+
+    //use this to trans position to color
+    function posToColor(position){
+      var red = 0;
+      var green = 0;
+      var blue = 0;
+      var alpha = 0;
+
+      alpha = getAlpha(position.sensor);
+      if(position.y >= 0){
+        if(position.x >= 0){
+          red = 255;
+          green = parseInt((1020-position.x)/4);
+        }else{
+          red = parseInt((1020+position.x)/4);
+          green = 255;
+        }
+        blue = parseInt(position.y/4);
+      }else{
+        red = parseInt((1024+position.x)/8);
+        green = parseInt((1024-position.x)/8);
+        blue = parseInt(-position.y/4);
+      }
+      console.log("rgb("+red+","+green+","+blue+","+alpha+")");
+      return "rgb("+red+","+green+","+blue+","+alpha+")";
+    }
+
+    function getAlpha(light){
+      var alpha = 0.2;
+      var max = 500;
+      var min_alpha = 0.2;
+      var max_alpha = 1;
+      var min = 25;
+      if(light<min) light = min;
+      if(light>max) light = max;
+      alpha = ((light - min) * (min_alpha - max_alpha) / (min - max)) + min_alpha;
+      return alpha
+    }
+
+    </script>
+</body>
+</html>

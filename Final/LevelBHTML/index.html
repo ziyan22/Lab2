@@ -1,0 +1,107 @@
+<!DOCTYPE>
+<html>
+  <head>
+    <style>
+    body {font: 14px/21px "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;}
+    ul {
+      width: 400px;
+      list-style-type: none;
+      list-style-image: outside;
+      margin: 0px;
+      padding: 0px;
+    }
+
+    li {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      position: relative;
+    }
+
+    li:last-child, li:first-child {
+      border-bottom: 1px solid #777;
+    }
+
+    li:first-child {
+      font-size: 20px;
+      background-color: #34c4fb;
+      border-radius: 3px;
+      color: white;
+      font-weight: bold;
+    }
+
+    a{
+      font-size: 15px;
+      color: black;
+    }
+    button{
+      font-size: 12px;
+      background-color: #f94b91;
+      border: 0 solid #509111;
+      border-radius: 3px;
+      color: white;
+      font-weight: bold;
+      padding: 5px 15px;
+      text-align: center;
+
+    }
+
+    button:hover {
+      opacity:.85;
+      cursor: pointer;
+    }
+
+    button:active {
+      border: 1px solid #20911e;
+      box-shadow: 0 0 10px 5px #f99ac0 inset;
+    }
+    span{
+      width: 200px;
+      margin-top: 3px;
+      padding: 3px;
+      display: inline-block;
+      float: left;
+    }
+
+    </style>
+
+    <script type="text/javascript">
+    function ServerWin(){
+      newWin = window.open( "http://localhost:3000/", "jsRef", "height=300, width=650, top=150");
+      //newWin.document.write("<h1 id='cool' style='postion:absolute; left:2px;'>754 is cool</h1>")
+    }
+    function createBasicCloudWin(){
+      newWin = window.open( "Cloud_line.html", "jsRef", "height=440, width=815, top=150, left=150");
+      //newWin.document.write("<h1 id='cool' style='postion:absolute; left:2px;'>754 is cool</h1>")
+    }
+    function createBubbleCloudWin(){
+      newWin = window.open( "7_Cloud_alpha.html", "jsRef", "height=440, width=815, top=150, left=150");
+      //newWin.document.write("<h1 id='cool' style='postion:absolute; left:2px;'>754 is cool</h1>")
+    }
+    </script>
+
+  </head>
+
+  <body>
+
+    <ul>
+      <center>
+      <li>Little Lab 2</li>
+    </center>
+      <li>
+        <span>Level C (SERVER)</span>
+        <button type="button" onclick="ServerWin()">I'm a button</button>
+      </li>
+
+      <li>
+        <span>Basic Level B (CLOUD)</span>
+        <button type="button" onclick="createBasicCloudWin()">I'm a button too</button>
+      </li>
+
+      <li>
+        <span>Bubble Maker (CLOUD)</span>
+        <button type="button" onclick="createBubbleCloudWin()">I'm a button three</button>
+      </li>
+
+    </ul>
+  </body>
+</html>
